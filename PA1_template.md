@@ -1,9 +1,4 @@
----
-title: "Reproducible Research: Peer Assessment 1"
-output: 
-  html_document:
-    keep_md: true
----
+# Reproducible Research: Peer Assessment 1
 
 
 ## Prerequisites
@@ -15,7 +10,8 @@ The required dataset is included in the GitHub repository. It can also be downlo
 
 ## Loading and preprocessing the data
 
-```{r}
+
+```r
 # unzip the dataset
 unzip(zipfile="activity.zip")
 # read in the data
@@ -28,44 +24,85 @@ activity$interval <- as.factor(activity$interval)
 str(activity)
 ```
 
+```
+## 'data.frame':	17568 obs. of  3 variables:
+##  $ steps   : int  NA NA NA NA NA NA NA NA NA NA ...
+##  $ date    : Date, format: "2012-10-01" "2012-10-01" ...
+##  $ interval: Factor w/ 288 levels "0","5","10","15",..: 1 2 3 4 5 6 7 8 9 10 ...
+```
+
 
 ## What is the mean total number of steps taken per day?
 
-```{r}
+
+```r
 # create an array containing the total number of steps for each day
 dailySteps <- tapply(activity$steps, activity$date, sum, na.rm=TRUE)
 # plot a histogram of the total number of steps per day
 hist(dailySteps, breaks=10, col="green", xlab="Number of steps", main="Total number of steps taken per day")
+```
+
+![](PA1_template_files/figure-html/unnamed-chunk-2-1.png) 
+
+```r
 # calculate the mean and the median of the total number of steps per day
 mean(dailySteps)
+```
+
+```
+## [1] 9354.23
+```
+
+```r
 median(dailySteps)
+```
+
+```
+## [1] 10395
 ```
 
 
 ## What is the average daily activity pattern?
 
-```{r}
+
+```r
 # create an array containing the mean number of steps for each interval
 intervalSteps <- tapply(activity$steps, activity$interval, mean, na.rm=TRUE)
 # plot a line plot of the mean number of steps per interval
 plot(intervalSteps, type="l", xaxt="n", xlab="Hour", ylab="Number of steps", main="Mean number of steps taken per five minute interval")
 axis(1, at=seq(1, 288, 12), labels=0:23)
+```
+
+![](PA1_template_files/figure-html/unnamed-chunk-3-1.png) 
+
+```r
 # calculate which interval has the maximum mean number of steps per interval
 # and display the value of this maximum as well
 intervalSteps[intervalSteps==max(intervalSteps)]
 ```
 
+```
+##      835 
+## 206.1698
+```
+
 
 ## Imputing missing values
 
-```{r}
+
+```r
 # determine the number of missing values
 sum(is.na(activity$steps))
 ```
 
+```
+## [1] 2304
+```
+
 The chosen impute strategy will use the mean number of steps for the interval concerned to fill in missing values.
 
-```{r}
+
+```r
 # create a copy of the dataset
 imputedActivity <- activity
 # create a logical vector to locate missing values
@@ -74,21 +111,49 @@ hasMissing <- is.na(imputedActivity$steps)
 imputedActivity[hasMissing, 1] <- intervalSteps[imputedActivity[hasMissing, 3]]
 # to verify, determine the number of missing values (should be 0)
 sum(is.na(imputedActivity$steps))
+```
+
+```
+## [1] 0
+```
+
+```r
 # to verify, determine if the interval averages are unchanged (should be TRUE)
 intervalSteps2 <- tapply(imputedActivity$steps, imputedActivity$interval, mean, na.rm=TRUE)
 identical(intervalSteps, intervalSteps2)
 ```
 
+```
+## [1] TRUE
+```
+
 Let's see the effect of our imputation:
 
-```{r}
+
+```r
 # create an array containing the total number of steps for each day
 dailySteps2 <- tapply(imputedActivity$steps, imputedActivity$date, sum, na.rm=TRUE)
 # plot a histogram of the total number of steps per day
 hist(dailySteps2, breaks=10, col="green", xlab="Number of steps", main="Total number of steps taken per day")
+```
+
+![](PA1_template_files/figure-html/unnamed-chunk-6-1.png) 
+
+```r
 # calculate the mean and the median of the total number of steps per day
 mean(dailySteps2)
+```
+
+```
+## [1] 10766.19
+```
+
+```r
 median(dailySteps2)
+```
+
+```
+## [1] 10766.19
 ```
 
 As we can see, both values have increased.
@@ -98,9 +163,17 @@ As we can see, both values have increased.
 
 The imputed dataset will be used for this last part.
 
-```{r}
+
+```r
 # Set the locale:
 Sys.setlocale("LC_TIME", "en_GB.utf8")
+```
+
+```
+## [1] "en_GB.utf8"
+```
+
+```r
 # create a logical vector to locate weekend days
 isWeekendday <- weekdays(imputedActivity$date) %in% c("Saturday", "Sunday")
 # create a new factor variable in the dataset to indicate type of day
@@ -116,6 +189,8 @@ plot(weekdaySteps, type="l", xaxt="n", xlab="Hour", ylab="Number of steps", main
 axis(1, at=seq(1, 288, 12), labels=0:23)
 mtext("Mean number of steps taken per five minute interval", outer=TRUE)
 ```
+
+![](PA1_template_files/figure-html/unnamed-chunk-7-1.png) 
 
 
 ## Notes
